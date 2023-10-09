@@ -79,7 +79,10 @@ def permitir_abrir_exame(request, exame_id):
     exame = SolicitacaoExame.objects.get(id=exame_id)
 
     if not exame.requer_senha:
-        # Verificar se tem ou não PDF do resultado
+        # Verificar se tem ou não PDF do resultado -----------------------------------------------------------------------------------
+        if not exame.resultado:
+            messages.add_message(request, constants.ERROR, 'Ainda não foi cadastrado o seu resultado, entre em contato com o laboratório.')
+            return(redirect('/exames/solicitar_exames'))
         return redirect(exame.resultado.url)
     return redirect(f'/exames/solicitar_senha_exame/{exame_id}')
 
@@ -90,7 +93,9 @@ def solicitar_senha_exame(request, exame_id):
         return render(request, 'solicitar_senha_exame.html', {'exame': exame})
     elif request.method == "POST":
         senha = request.POST.get('senha')
-        # Verificar se tem ou não PDF do resultado
+        if not exame.resultado:
+            messages.add_message(request, constants.ERROR, 'Ainda não foi cadastrado o seu resultado, entre em contato com o laboratório.')
+            return(redirect('/exames/solicitar_exames'))
         if senha == exame.senha:
             return redirect(exame.resultado.url)
         else:
